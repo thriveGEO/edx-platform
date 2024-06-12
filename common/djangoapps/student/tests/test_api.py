@@ -4,7 +4,7 @@ Test Student api.py
 from xmodule.modulestore.tests.django_utils import SharedModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory
 
-from common.djangoapps.student.api import is_user_enrolled_in_course, is_user_staff_or_instructor_in_course
+from common.djangoapps.student.api import is_user_enrolled_in_course, is_user_staff_or_instructor_in_course, get_last_enrolled_course
 from common.djangoapps.student.tests.factories import (
     CourseEnrollmentFactory,
     GlobalStaffFactory,
@@ -39,6 +39,26 @@ class TestStudentApi(SharedModuleStoreTestCase):
         )
 
         result = is_user_enrolled_in_course(self.user, self.course_run_key)
+        assert result
+
+    def test_last_enrolled_course(self):
+        """
+        Verify that the most recently enrolled course is returned.
+        """
+        old_course = CourseFactory.create()
+        CourseEnrollmentFactory.create(
+            user_id=self.user.id,
+            course_id=old_course.id
+        )
+
+        new_enrollment = CourseEnrollmentFactory.create(
+            user_id=self.user.id,
+            course_id=self.course.id
+        )
+
+        last_enrolled_course = get_last_enrolled_course(user_id=self.user.id)
+
+        result = last_enrolled_course == new_enrollment
         assert result
 
     def test_is_user_enrolled_in_course_not_active(self):

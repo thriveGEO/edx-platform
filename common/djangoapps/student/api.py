@@ -136,3 +136,17 @@ def is_user_staff_or_instructor_in_course(user, course_key):
         CourseStaffRole(course_key).has_user(user) or
         CourseInstructorRole(course_key).has_user(user)
     )
+
+def get_last_enrolled_course(user_id):
+    """
+    Get the last course that a user enrolled in.
+
+    Arguments:
+        user_id: The ID for a user
+
+    Returns:
+        last_course_enrolled (CourseEnrollment): The last course enrolled by the user
+    """
+    course_enrollments = CourseEnrollment.enrollments_for_user(user_id)
+    last_course_enrolled = course_enrollments.order_by("created").last()
+    return last_course_enrolled 
