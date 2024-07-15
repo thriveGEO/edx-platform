@@ -2159,7 +2159,7 @@ def list_background_email_tasks(request, course_id):
     return JsonResponse(response_payload)
 
 
-class ListCourseRoleMembersView(APIView):
+class ListEmailContent(APIView):
     """
     List the content of bulk emails sent
     """
@@ -2181,7 +2181,7 @@ class ListCourseRoleMembersView(APIView):
         response_payload = {
             'emails': list(map(extract_email_features, emails)),
         }
-        return Response(response_payload)
+        return JsonResponse(response_payload)
 
 
 class InstructorTaskSerializer(serializers.Serializer):  # pylint: disable=abstract-method
