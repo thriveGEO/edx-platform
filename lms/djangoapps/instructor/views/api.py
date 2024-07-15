@@ -230,6 +230,28 @@ def require_course_permission(permission):
         return wrapped
     return decorator
 
+def verify_course_permission(permission):
+    """
+        Decorator with argument that requires a specific permission of the requesting
+        user. If the requirement is not satisfied, returns an
+        HttpResponseForbidden (403).
+        Assumes that request is in self.
+        Assumes that course_id is in kwargs['course_id'].
+        """
+    def decorator(func):
+        def wrapped(self, *args, **kwargs):
+            request = self.request
+            course = get_course_by_id(CourseKey.from_string(kwargs['course_id']))
+
+            if request.user.has_perm(permission, course):
+                return func(self, *args, **kwargs)
+            else:
+                return HttpResponseForbidden()
+
+        return wrapped
+
+    return decorator
+
 
 def require_sales_admin(func):
     """
@@ -1495,28 +1517,34 @@ def get_students_features(request, course_id, csv=False):  # pylint: disable=red
         return JsonResponse({"status": success_status})
 
 
-@transaction.non_atomic_requests
-@require_POST
-@ensure_csrf_cookie
-@cache_control(no_cache=True, no_store=True, must_revalidate=True)
-@require_course_permission(permissions.CAN_RESEARCH)
-@common_exceptions_400
-def get_students_who_may_enroll(request, course_id):
+@method_decorator(transaction.non_atomic_requests, name='dispatch')
+class GetStudentsWhoMayEnroll(APIView):
     """
     Initiate generation of a CSV file containing information about
     students who may enroll in a course.
 
     Responds with JSON
         {"status": "... status message ..."}
-
     """
-    course_key = CourseKey.from_string(course_id)
-    query_features = ['email']
-    report_type = _('enrollment')
-    task_api.submit_calculate_may_enroll_csv(request, course_key, query_features)
-    success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
 
-    return JsonResponse({"status": success_status})
+    authentication_classes = (
+        JwtAuthentication,
+        BearerAuthenticationAllowInactiveUser,
+        SessionAuthenticationAllowInactiveUser,
+    )
+    permission_classes = (IsAuthenticated, )
+
+    @transaction.non_atomic_requests
+    @method_decorator(ensure_csrf_cookie)
+    @verify_course_permission(permissions.CAN_RESEARCH)
+    @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
+    def post(self, request, course_id):
+        course_key = CourseKey.from_string(course_id)
+        query_features = ['email']
+        report_type = _('enrollment')
+        task_api.submit_calculate_may_enroll_csv(request, course_key, query_features)
+        success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
+        return JsonResponse({"status": success_status})
 
 
 def _cohorts_csv_validator(file_storage, file_to_validate):
