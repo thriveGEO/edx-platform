@@ -135,6 +135,7 @@ from .tools import (
     require_student_from_identifier,
     set_due_date_extension,
     strip_if_string,
+    DashboardError
 )
 from .. import permissions
 
@@ -2930,17 +2931,14 @@ class ShowStudentExtensionSerializer(serializers.Serializer):
     Serializer for validating and processing the student identifier.
     """
     student = serializers.CharField(write_only=True, required=True)
-
     def validate(self, data):
         """
         Validates the student identifier and converts it to a student object.
         """
         student_identifier = data.get('student')
-        student = get_student_from_identifier(student_identifier)
-        if not student:
-            raise serializers.ValidationError("Invalid student identifier")
-        data['student'] = student
+        data['student'] = require_student_from_identifier(student_identifier)
         return data
+
 
 @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True), name='dispatch')
 # @method_decorator(handle_dashboard_error)
@@ -2949,7 +2947,6 @@ class ShowStudentExtensions(APIView):
     Shows all of the due date extensions granted to a particular student in a
     particular course.
     """
-
     authentication_classes = (
         JwtAuthentication,
         BearerAuthenticationAllowInactiveUser,
