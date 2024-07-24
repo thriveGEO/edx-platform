@@ -1544,7 +1544,7 @@ class GetStudentsWhoMayEnroll(APIView):
         report_type = _('enrollment')
         task_api.submit_calculate_may_enroll_csv(request, course_key, query_features)
         success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
-        return JsonResponse({"status": success_status})
+        return Response({"status": success_status})
 
 
 def _cohorts_csv_validator(file_storage, file_to_validate):
