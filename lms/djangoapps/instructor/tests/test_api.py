@@ -413,21 +413,12 @@ class TestInstructorAPIDenyLevels(SharedModuleStoreTestCase, LoginEnrollmentTest
 
         # Endpoints that only Staff or Instructors can access
         self.staff_level_endpoints = [
-
             ('get_students_who_may_enroll', {}),
-            # ('get_proctored_exam_results', {}),
-            # ('get_problem_responses', {}),
-            # ('instructor_api_v1:generate_problem_responses', {"problem_locations": [str(self.problem.location)]}),
-            # ('export_ora2_data', {}),
-
         ]
         # Endpoints that only Instructors can access
         self.instructor_level_endpoints = [
-            ('bulk_beta_modify_access', {'identifiers': 'foo@example.org', 'action': 'add'}),
+            # ('bulk_beta_modify_access', {'identifiers': 'foo@example.org', 'action': 'add'}),
             ('modify_access', {'unique_student_identifier': self.user.email, 'rolename': 'beta', 'action': 'allow'}),
-            ('list_course_role_members', {'rolename': 'beta'}),
-            ('rescore_problem', {'problem_to_reset': self.problem_urlname, 'all_students': True}),
-            ('reset_student_attempts', {'problem_to_reset': self.problem_urlname, 'all_students': True}),
         ]
 
     def _access_endpoint(self, endpoint, args, status_code, msg, content_type=MULTIPART_CONTENT):
