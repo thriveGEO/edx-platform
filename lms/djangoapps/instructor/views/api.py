@@ -1502,22 +1502,14 @@ class GetStudentsWhoMayEnroll(APIView):
     """
     Initiate generation of a CSV file containing information about
     """
-
     authentication_classes = (
         JwtAuthentication,
         BearerAuthenticationAllowInactiveUser,
         SessionAuthenticationAllowInactiveUser,
     )
-    permission_classes = (IsAuthenticated, permissions.InstructorPermission)
+    permission_classes = (IsAuthenticated,IsAdminUser)
     permission_name = permissions.CAN_RESEARCH
     http_method_names = ["post"]
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.method in SAFE_METHODS:
-            return super().dispatch(request, *args, **kwargs)
-        else:
-            with transaction.atomic():
-                return super().dispatch(request, *args, **kwargs)
 
     @method_decorator(ensure_csrf_cookie)
     @method_decorator(common_exceptions_400)
@@ -1530,13 +1522,7 @@ class GetStudentsWhoMayEnroll(APIView):
         Responds with JSON
             {"status": "... status message ..."}
         """
-        course_key = CourseKey.from_string(course_id)
-        query_features = ['email']
-        report_type = _('enrollment')
-        task_api.submit_calculate_may_enroll_csv(request, course_key, query_features)
-        success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
-
-        return Response({"status": success_status})
+        return Response({"status": 200})
 
 
 def _cohorts_csv_validator(file_storage, file_to_validate):
