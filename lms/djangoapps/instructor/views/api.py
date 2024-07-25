@@ -1494,12 +1494,15 @@ def get_students_features(request, course_id, csv=False):  # pylint: disable=red
 
         return JsonResponse({"status": success_status})
 
+from rest_framework.permissions import SAFE_METHODS
+
 @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True), name='dispatch')
 @method_decorator(transaction.non_atomic_requests, name='dispatch')
 class GetStudentsWhoMayEnroll(APIView):
     """
     Initiate generation of a CSV file containing information about
     """
+
     authentication_classes = (
         JwtAuthentication,
         BearerAuthenticationAllowInactiveUser,
@@ -1507,10 +1510,18 @@ class GetStudentsWhoMayEnroll(APIView):
     )
     permission_classes = (IsAuthenticated, permissions.InstructorPermission)
     permission_name = permissions.CAN_RESEARCH
+    http_method_names = ["post"]
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.method in SAFE_METHODS:
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            with transaction.atomic():
+                return super().dispatch(request, *args, **kwargs)
 
     @method_decorator(ensure_csrf_cookie)
     @method_decorator(common_exceptions_400)
-    @transaction.non_atomic_requests
+    @method_decorator(transaction.non_atomic_requests)
     def post(self, request, course_id):
         """
         Initiate generation of a CSV file containing information about
