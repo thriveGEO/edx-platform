@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from uuid import uuid4
 from unittest.mock import patch
 
+from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 
 from xmodule.modulestore.exceptions import ItemNotFoundError
@@ -274,10 +275,14 @@ class ChildrenMapTestMixin:
         # create empty block structure
         block_structure = block_structure_cls(root_block_usage_key=self.block_key_factory(0))
 
-        # _add_relation
+        # _add_relation and blocks
         for parent, children in enumerate(children_map):
+            if isinstance(block_structure, BlockStructureBlockData):
+                block_structure._get_or_create_block(self.block_key_factory(parent))  # pylint: disable=protected-access
             for child in children:
                 block_structure._add_relation(self.block_key_factory(parent), self.block_key_factory(child))  # pylint: disable=protected-access
+                if isinstance(block_structure, BlockStructureBlockData):
+                    block_structure._get_or_create_block(self.block_key_factory(child))  # pylint: disable=protected-access
         return block_structure
 
     def get_parents_map(self, children_map):
