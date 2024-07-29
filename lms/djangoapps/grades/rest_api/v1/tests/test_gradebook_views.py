@@ -2228,6 +2228,12 @@ class SubsectionGradeViewTest(GradebookViewTestBase):
             display_name='Unreleased Section',
         )
 
+        # We need to update the course in the cache after we create the new block.
+        # Review Question: Should we be doing this here? Does it make sense to do
+        # this in the xmodule/modulestore/tests/factories.py BlockFactory class
+        # as a part of the publish there?
+        bs_api.update_course_in_cache(self.course_data.course_key)
+
         resp = self.client.get(
             self.get_url(subsection_id=unreleased_subsection.location)
         )
