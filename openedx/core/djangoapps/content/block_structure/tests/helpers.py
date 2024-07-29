@@ -7,7 +7,6 @@ from contextlib import contextmanager
 from uuid import uuid4
 from unittest.mock import patch
 
-from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator
 
 from xmodule.modulestore.exceptions import ItemNotFoundError
