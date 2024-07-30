@@ -219,7 +219,7 @@ def complete_user_registration(
 ):
     from openedx.features.enterprise_support.utils import is_enterprise_learner
     from common.djangoapps.student.models import Registration
-    print(f'\n\n\n\n\n user={user} date_joined={user.date_joined.strftime("%Y-%m-%d")} username={user.username} id={user.id} email={user.email} is_staff={user.is_staff} is_enterprise={is_enterprise_learner(user)} registration_object={Registration.objects.get(user=user)} profile={user.profile} profile_name={user.profile.name} is_active={user.is_active} \n\n\n\n\n\n\n\n\n\n')
+    print(f'\n\n\n\n\ncomplete_user_registration user={user} profile={profile} params={params} id={user.id} third_party_provider={third_party_provider} registration={registration} is_marketable={is_marketable} running_pipeline={running_pipeline} cleaned_password={cleaned_password} request.COOKIES={request.COOKIES} request.site={request.site} \n\n\n\n\n\n\n\n\n\n')
     try:
         _record_is_marketable_attribute(is_marketable, user)
     # Don't prevent a user from registering if is_marketable is not being set.
@@ -383,7 +383,7 @@ def _record_is_marketable_attribute(is_marketable, user):
 
 
 def _track_user_registration(user, profile, params, third_party_provider, registration, is_marketable):
-    print(f'\n\n\n PIPELINE_STEP: _track_user_registration => user: {user} , profile: {profile} , params: {params} , third_party_provider: {third_party_provider} , registration: {registration} ,  is_marketable: {is_marketable}')
+    print(f'\n\n\n _track_user_registration => user: {user} , profile: {profile} , params: {params} , third_party_provider: {third_party_provider} , registration: {registration} ,  is_marketable: {is_marketable}')
     """ Track the user's registration. """
     if hasattr(settings, 'LMS_SEGMENT_KEY') and settings.LMS_SEGMENT_KEY:
         traits = {
