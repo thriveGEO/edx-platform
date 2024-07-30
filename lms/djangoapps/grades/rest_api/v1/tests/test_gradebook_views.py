@@ -22,6 +22,7 @@ from rest_framework.test import APITestCase
 from xmodule.modulestore.tests.django_utils import SharedModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory, BlockFactory
 
+import openedx.core.djangoapps.content.block_structure.api as bs_api
 from common.djangoapps.course_modes.models import CourseMode
 from common.djangoapps.student.roles import (
     CourseBetaTesterRole,
